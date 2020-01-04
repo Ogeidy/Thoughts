@@ -1,0 +1,5 @@
+[Master]
+init-hook='import sys; sys.path.append("./thoughts")'
+
+[MESSAGES CONTROL]
+disable=W,C0114,C0116
