@@ -37,6 +37,15 @@ if args.action == 'get':
         # print('MentionTag:')
         for th in select_querry(conn, 'SELECT * FROM MentionTag'):
             print(th)
+if args.action == 'add':
+    if args.type == 'thought':
+        create_thought(conn, args.payload)
+    if args.type == 'mention':
+        add_mention(conn, args.payload)
+    if args.type == 'tag':
+        create_tag(conn, args.payload)
+    if args.type == 'mention_tag':
+        pass
 
 
 # print(create_thought(conn, ('Roper', 'Good')))
