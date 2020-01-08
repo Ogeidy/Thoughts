@@ -37,12 +37,12 @@ def select_querry(conn, sql_string):
 
 
 def select_thought(conn):
-    return select_querry(conn, 'SELECT * FROM Thought')
+    return select_querry(conn, 'SELECT * FROM thought')
 
 
 def select_mention(conn):
-    querry = """SELECT Mention.Id, Thought.Name, datetime(Mention.date, 'localtime')
-                FROM Mention INNER JOIN Thought ON Thought.Id = Mention.ThoughtId"""
+    querry = """SELECT mention.Id, thought.Name, datetime(mention.date, 'localtime')
+                FROM mention INNER JOIN thought ON thought.Id = mention.thought_id"""
     return select_querry(conn, querry)
 
 
@@ -57,28 +57,43 @@ def insert_querry(conn, sql_string, params):
 
 
 def create_thought(conn, thought):
-    querry = 'INSERT INTO Thought(Name, Description) VALUES(?,?)'
+    querry = 'INSERT INTO thought(name, description) VALUES(?,?)'
     return insert_querry(conn, querry, thought)
 
 
 def create_tag(conn, tag):
-    querry = 'INSERT INTO Tag(Name) VALUES(?)'
+    querry = 'INSERT INTO tag(name) VALUES(?)'
     return insert_querry(conn, querry, tag)
 
 
 def add_mention(conn, mention):
     if len(mention) == 1:
-        querry = 'INSERT INTO Mention(ThoughtId) VALUES(?)'
+        querry = 'INSERT INTO mention(thought_id) VALUES(?)'
     else:
-        querry = 'INSERT INTO Mention(ThoughtId, Date) VALUES(?, ?)'
+        querry = 'INSERT INTO mention(thought_id, date) VALUES(?, ?)'
     return insert_querry(conn, querry, mention)
 
 
 def add_mentiontag(conn, mention_tag):
-    querry = 'INSERT INTO MentionTag(MentionId, TagId) VALUES(?, ?)'
+    querry = 'INSERT INTO mention_tag(mention_id, tag_id) VALUES(?, ?)'
     return insert_querry(conn, querry, mention_tag)
 
 
+def delete_thought(conn, thought):
+    querry = 'DELETE FROM thought WHERE id=?'
+    return insert_querry(conn, querry, thought)
 
-if __name__ == '__main__':
-    print('Hello')
+
+def delete_mention(conn, mention):
+    querry = 'DELETE FROM mention WHERE id=?'
+    return insert_querry(conn, querry, mention)
+
+
+def delete_tag(conn, tag):
+    querry = 'DELETE FROM tag WHERE id=?'
+    return insert_querry(conn, querry, tag)
+
+
+def delete_mentiontag(conn, mention_tag):
+    querry = 'DELETE FROM mention_tag WHERE mention_id=? AND tag_id=?'
+    return insert_querry(conn, querry, mention_tag)

@@ -13,4 +13,5 @@ pip install -r requirements.txt
 - https://docs.python.org/3/tutorial/modules.html
 - https://pylint.readthedocs.io/en/latest/index.html
 - https://www.sqlitetutorial.net/sqlite-python/
+- https://docs.python.org/3.8/library/argparse.html
 - 

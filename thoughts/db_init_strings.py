@@ -1,24 +1,32 @@
-SQL_CREATE_THOUGHT_TABLE = '''CREATE TABLE IF NOT EXISTS Thought (
-                            Id INTEGER PRIMARY KEY,
-                            Name TEXT NOT NULL,
-                            Description TEXT,
-                            UNIQUE (Name)
+SQL_CREATE_THOUGHT_TABLE = '''CREATE TABLE IF NOT EXISTS thought (
+                            id INTEGER PRIMARY KEY,
+                            name TEXT NOT NULL,
+                            description TEXT,
+                            UNIQUE (name)
                         );'''
-SQL_CREATE_MENTION_TABLE = '''CREATE TABLE IF NOT EXISTS Mention (
-                            Id INTEGER PRIMARY KEY,
-                            ThoughtId INTEGER NOT NULL,
-                            Date TEXT DEFAULT CURRENT_TIMESTAMP,
-                            FOREIGN KEY (ThoughtId) REFERENCES Thought (Id)
+SQL_CREATE_MENTION_TABLE = '''CREATE TABLE IF NOT EXISTS mention (
+                            id INTEGER PRIMARY KEY,
+                            thought_id INTEGER NOT NULL,
+                            date TEXT DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (thought_id) 
+                                REFERENCES thought (id)
+                                    ON DELETE CASCADE
+                                    ON UPDATE CASCADE
                         );'''
-SQL_CREATE_TAG_TABLE = '''CREATE TABLE IF NOT EXISTS Tag (
-                            Id INTEGER PRIMARY KEY,
-                            Name TEXT NOT NULL,
-                            UNIQUE (Name)
+SQL_CREATE_TAG_TABLE = '''CREATE TABLE IF NOT EXISTS tag (
+                            id INTEGER PRIMARY KEY,
+                            name TEXT NOT NULL UNIQUE
                         );'''
-SQL_CREATE_MENTIONTAG_TABLE = '''CREATE TABLE IF NOT EXISTS MentionTag (
-                            MentionId INTEGER NOT NULL,
-                            TagId INTEGER NOT NULL,
-                            FOREIGN KEY (MentionId) REFERENCES Mention (Id),
-                            FOREIGN KEY (TagId) REFERENCES Tag (Id),
-                            UNIQUE (MentionId, TagId)
+SQL_CREATE_MENTIONTAG_TABLE = '''CREATE TABLE IF NOT EXISTS mention_tag (
+                            mention_id INTEGER,
+                            tag_id INTEGER,
+                            PRIMARY KEY (mention_id, tag_id),
+                            FOREIGN KEY (mention_id) 
+                                REFERENCES mention (id)
+                                    ON DELETE CASCADE
+                                    ON UPDATE CASCADE,
+                            FOREIGN KEY (tag_id) 
+                                REFERENCES tag (id)
+                                    ON DELETE CASCADE
+                                    ON UPDATE CASCADE
                         );'''
