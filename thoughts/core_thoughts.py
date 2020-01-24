@@ -1,6 +1,6 @@
 import sqlite3
 
-from db_init_strings import *
+from thoughts.db_init_strings import *
 
 
 def create_connection(db_file):
