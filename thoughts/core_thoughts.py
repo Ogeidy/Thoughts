@@ -1,6 +1,7 @@
 import sqlite3
 
 from thoughts.db_init_strings import *
+# from db_init_strings import *
 
 
 def create_connection(db_file):
@@ -30,20 +31,31 @@ def select_querry(conn, sql_string):
     try:
         cursor = conn.cursor()
         cursor.execute(sql_string)
-        return cursor.fetchall()
+        return [tuple(descr[0] for descr in cursor.description)] + cursor.fetchall()
     except sqlite3.OperationalError as exc:
         print('OperationalError\n' + str(exc))
     return None
 
 
-def select_thought(conn):
-    return select_querry(conn, 'SELECT * FROM thought')
-
-
-def select_mention(conn):
-    querry = """SELECT mention.Id, thought.Name, datetime(mention.date, 'localtime')
-                FROM mention INNER JOIN thought ON thought.Id = mention.thought_id"""
-    return select_querry(conn, querry)
+def select(conn, type):
+    result = None
+    if (type == 'thought'):
+        result = select_querry(conn, 'SELECT * FROM thought')
+    elif (type == 'mention'):
+        result = select_querry(conn, 'SELECT * FROM mention')
+    elif (type == 'tag'):
+        result = select_querry(conn, 'SELECT * FROM tag')
+    elif (type == 'mention_tag'):
+        result = select_querry(conn, 'SELECT * FROM mention_tag')
+    elif (type == 'all'):
+        querry = """SELECT mention.id, thought.name, thought.description,
+                datetime(mention.date, 'localtime') AS date,
+                (SELECT GROUP_CONCAT(name) 
+                FROM tag INNER JOIN mention_tag ON tag.id=mention_tag.tag_id 
+                WHERE mention_tag.mention_id=mention.id) AS tags
+                FROM mention INNER JOIN thought ON thought.id = mention.thought_id"""
+        result = select_querry(conn, querry)
+    return result
 
 
 def insert_querry(conn, sql_string, params):
