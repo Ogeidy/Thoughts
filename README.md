@@ -16,6 +16,7 @@ pip install -r requirements.txt
 - https://docs.python.org/3.8/library/argparse.html
 - https://tkdocs.com/tutorial
 - https://github.com/Dvlv/Tkinter-By-Example
+- https://habr.com/ru/post/321510/ - Python: Работа с базой данных, часть 1/2: Используем DB-API
 
 
 ## TODO
