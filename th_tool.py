@@ -19,14 +19,7 @@ if args.action == 'get':
     for th in select(conn, args.type):
         print(th)
 if args.action == 'add':
-    if args.type == 'thought':
-        create_thought(conn, args.payload)
-    if args.type == 'mention':
-        add_mention(conn, args.payload)
-    if args.type == 'tag':
-        create_tag(conn, args.payload)
-    if args.type == 'mention_tag':
-        add_mentiontag(conn, args.payload)
+    insert(conn, args.type, args.payload)
 if args.action == 'delete':
     if args.type == 'thought':
         delete_thought(conn, args.payload)

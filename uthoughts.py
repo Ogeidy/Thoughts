@@ -1,3 +1,4 @@
+import datetime
 from tkinter import *
 from tkinter import ttk
 from tkcalendar import Calendar, DateEntry
@@ -30,30 +31,45 @@ class ThoughtFrame(Frame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        Label(self, text='Thought:').grid(row=0, column=0)
-        self.name = Entry(self, width=50)
-        self.name.grid(row=0, column=1, pady=5)
+        self.thoughts = select(conn, 'thought')
+        names = [thought[1] for thought in self.thoughts[1:]]
 
-        Label(self, text='Description:').grid(row=1, column=0, pady=5, sticky=N)
+        Label(self, text='Thought:').grid(row=0, column=0, sticky=E)
+        self.name = ttk.Combobox(self, values=names)
+        self.name.grid(row=0, column=1, columnspan=2, pady=5, sticky=EW)
+        self.name.bind("<<ComboboxSelected>>", self.update_description)
+
+        Label(self, text='Description:').grid(row=1, column=0, pady=5, sticky=NE)
         self.descr = Text(self, width=50, height=10)
-        self.descr.grid(row=1, column=1, pady=5)
+        self.descr.grid(row=1, column=1, columnspan=2, pady=5, sticky=W)
 
-        Label(self, text='Date:').grid(row=2, column=0)
-        self.date = DateEntry(self, date_pattern='y-mm-dd', width=49)
-        self.date.grid(row=2, column=1, pady=5)
+        Label(self, text='Date:').grid(row=2, column=0, sticky=E)
+        self.date = DateEntry(self, date_pattern='y-mm-dd')
+        self.date.grid(row=2, column=1, pady=5, sticky=EW)
+
+        self.time = Entry(self, )
+        self.time.grid(row=2, column=2, pady=5, sticky=EW)
+        self.time.insert(0, datetime.datetime.now().strftime("%H:%M:%S"))
 
         self.btn_ok = Button(self,
                     text='Ok',
                     width=10, height=1,
                     bg='white', fg='black')
         self.btn_ok.bind('<Button-1>', self.submit)
-        self.btn_ok.grid(row=3, column=0, columnspan=2, pady=5)
+        self.btn_ok.grid(row=3, column=0, columnspan=3, pady=5)
+
+    def update_description(self, event):
+        for thought in self.thoughts:
+            if thought[1] == self.name.get():
+                self.descr.delete('1.0', END)
+                self.descr.insert(END, thought[2])
+                break
 
     def submit(self, event):
         print(self.name.get())
         print(self.descr.get('1.0', END))
-        print(self.date.get_date())
-
+        dt = str(self.date.get_date()) + ' ' + str(self.time.get())
+        insert(conn, 'all', [self.name.get(), self.descr.get('1.0', END), dt])
 
 
 class ShowFrame(Frame):
@@ -120,10 +136,10 @@ class ShowFrame(Frame):
 
 if __name__ == '__main__':
     conn = create_connection('test.sqlite')
-    init_db(conn) # ???
+    init_db(conn) # TODO: ???
 
     gui = GuiThought()
     gui.mainloop()
 
-    conn.commit()
+    # conn.commit() # TODO
     conn.close()
