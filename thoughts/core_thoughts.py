@@ -37,17 +37,17 @@ def select_querry(conn, sql_string):
     return None
 
 
-def select(conn, type):
+def select(conn, req_type):
     result = None
-    if (type == 'thought'):
+    if (req_type == 'thought'):
         result = select_querry(conn, 'SELECT * FROM thought')
-    elif (type == 'mention'):
+    elif (req_type == 'mention'):
         result = select_querry(conn, 'SELECT * FROM mention')
-    elif (type == 'tag'):
+    elif (req_type == 'tag'):
         result = select_querry(conn, 'SELECT * FROM tag')
-    elif (type == 'mention_tag'):
+    elif (req_type == 'mention_tag'):
         result = select_querry(conn, 'SELECT * FROM mention_tag')
-    elif (type == 'all'):
+    elif (req_type == 'all'):
         querry = """SELECT mention.id, thought.name, thought.description,
                 datetime(mention.date, 'localtime') AS date,
                 (SELECT GROUP_CONCAT(name) 
@@ -69,20 +69,20 @@ def insert_querry(conn, sql_string, params):
     return None
 
 
-def insert(conn, type, params):
+def insert(conn, req_type, params):
     result = None
-    if (type == 'thought'):
+    if (req_type == 'thought'):
         result = insert_querry(conn, 'INSERT INTO thought(name, description) VALUES(?,?)', params)
-    elif (type == 'mention'):
+    elif (req_type == 'mention'):
         if len(params) == 1:
             result = insert_querry(conn, 'INSERT INTO mention(thought_id) VALUES(?)', params)
         else:
             result = insert_querry(conn, 'INSERT INTO mention(thought_id, date) VALUES(?, ?)', params)
-    elif (type == 'tag'):
+    elif (req_type == 'tag'):
         result = insert_querry(conn, 'INSERT INTO tag(name) VALUES(?)', params)
-    elif (type == 'mention_tag'):
+    elif (req_type == 'mention_tag'):
         result = insert_querry(conn, 'INSERT INTO mention_tag(mention_id, tag_id) VALUES(?, ?)', params)
-    elif (type == 'all'):
+    elif (req_type == 'all'):
         print(params)
         check = select_querry(conn, 'SELECT * FROM thought WHERE name=\'' + params[0] + '\'')
         if len(check) > 1:
