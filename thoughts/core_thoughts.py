@@ -37,24 +37,33 @@ def select_querry(conn, sql_string):
     return None
 
 
-def select(conn, req_type):
+def select(conn, req_type, params=None):
     result = None
-    if (req_type == 'thought'):
+    if req_type == 'thought':
         result = select_querry(conn, 'SELECT * FROM thought')
-    elif (req_type == 'mention'):
+    elif req_type == 'mention':
         result = select_querry(conn, 'SELECT * FROM mention')
-    elif (req_type == 'tag'):
+    elif req_type == 'last_mention_tag':
+        if params is None:
+            return 0
+        querry = f"""SELECT tag_id FROM mention_tag
+                    WHERE mention_id=
+                    (SELECT id
+                        FROM mention
+                        WHERE thought_id={params} ORDER BY id DESC limit 1);"""
+        result = select_querry(conn, querry)
+    elif req_type == 'tag':
         result = select_querry(conn, 'SELECT * FROM tag')
-    elif (req_type == 'mention_tag'):
+    elif req_type == 'mention_tag':
         result = select_querry(conn, 'SELECT * FROM mention_tag')
-    elif (req_type == 'all'):
+    elif req_type == 'all':
         querry = """SELECT mention.id, thought.name, thought.description,
-                datetime(mention.date, 'localtime') AS date,
-                (SELECT GROUP_CONCAT(name) 
-                    FROM tag INNER JOIN mention_tag ON tag.id=mention_tag.tag_id 
-                    WHERE mention_tag.mention_id=mention.id
-                ) AS tags
-                FROM mention INNER JOIN thought ON thought.id = mention.thought_id"""
+                    datetime(mention.date, 'localtime') AS date,
+                    (SELECT GROUP_CONCAT(name) 
+                        FROM tag INNER JOIN mention_tag ON tag.id=mention_tag.tag_id 
+                        WHERE mention_tag.mention_id=mention.id
+                    ) AS tags
+                    FROM mention INNER JOIN thought ON thought.id = mention.thought_id"""
         result = select_querry(conn, querry)
     return result
 
@@ -71,28 +80,47 @@ def insert_querry(conn, sql_string, params):
 
 def insert(conn, req_type, params):
     result = None
-    if (req_type == 'thought'):
-        result = insert_querry(conn, 'INSERT INTO thought(name, description) VALUES(?,?)', params)
-    elif (req_type == 'mention'):
+    if req_type == 'thought':
+        result = insert_querry(conn,
+                               'INSERT INTO thought(name, description) \
+                                   VALUES(?,?)',
+                               params)
+    elif req_type == 'mention':
         if len(params) == 1:
-            result = insert_querry(conn, 'INSERT INTO mention(thought_id) VALUES(?)', params)
+            result = insert_querry(conn,
+                                   'INSERT INTO mention(thought_id) \
+                                       VALUES(?)',
+                                   params)
         else:
-            result = insert_querry(conn, 'INSERT INTO mention(thought_id, date) VALUES(?, ?)', params)
-    elif (req_type == 'tag'):
+            result = insert_querry(conn,
+                                   'INSERT INTO mention(thought_id, date) \
+                                       VALUES(?, ?)',
+                                   params)
+    elif req_type == 'tag':
         result = insert_querry(conn, 'INSERT INTO tag(name) VALUES(?)', params)
-    elif (req_type == 'mention_tag'):
-        result = insert_querry(conn, 'INSERT INTO mention_tag(mention_id, tag_id) VALUES(?, ?)', params)
-    elif (req_type == 'all'):
-        print(params)
-        check = select_querry(conn, 'SELECT * FROM thought WHERE name=\'' + params[0] + '\'')
+    elif req_type == 'mention_tag':
+        result = insert_querry(conn,
+                               'INSERT INTO mention_tag(mention_id, tag_id) \
+                                   VALUES(?, ?)',
+                               params)
+    elif req_type == 'all':
+        check = select_querry(conn,
+                              'SELECT * FROM thought \
+                                  WHERE name=\'' + params[0] + '\'')
         if len(check) > 1:
             thought_id = check[1][0]
         else:
-            print(params[:2])
-            thought_id = insert_querry(conn, 'INSERT INTO thought(name, description) VALUES(?,?)', params[:2])
-            print('added')
-        print(thought_id)
-        result = insert_querry(conn, 'INSERT INTO mention(thought_id, date) VALUES(?, ?)', [thought_id, params[2]])
+            thought_id = insert_querry(conn,
+                                       'INSERT INTO thought(name, description) \
+                                           VALUES(?,?)',
+                                       params[:2])
+        result = insert_querry(conn,
+                               'INSERT INTO mention(thought_id, date) \
+                                   VALUES(?, ?)',
+                               [thought_id, params[2]])
+        if len(params[3]) > 0:
+            for tag_id in params[3]:
+                insert(conn, 'mention_tag', [result, tag_id])
     conn.commit()
     return result
 
